@@ -71,32 +71,35 @@ export function QuickActions() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {quickActions.map((action) => (
-        <Card key={action.id} className="hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center mb-4">
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-4 ${getColorClasses(action.color)}`}>
-                <IconComponent iconName={action.icon} className="w-6 h-6" />
+    <div className="mb-12">
+      <h2 className="text-2xl font-bold text-neutral-900 mb-6">Quick Actions</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {quickActions.map((action) => (
+          <Card key={action.id} className="hover:shadow-lg transition-all duration-200 border-0 shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center mb-4">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-4 ${getColorClasses(action.color)}`}>
+                  <IconComponent iconName={action.icon} className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-neutral-900">{action.title}</h3>
+                  <p className="text-sm text-neutral-600">{action.description}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-neutral-900">{action.title}</h3>
-                <p className="text-sm text-neutral-600">{action.description}</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => handleAction(action.action)}
-              className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-colors"
-              variant="ghost"
-            >
-              {action.icon === "upload" && <Plus className="w-4 h-4 mr-2" />}
-              {action.icon === "history" && <Clock className="w-4 h-4 mr-2" />}
-              {action.icon === "bot" && <MessageCircle className="w-4 h-4 mr-2" />}
-              {action.title.split(" ")[0]} {action.title.split(" ")[1]}
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
+              <Button
+                onClick={() => handleAction(action.action)}
+                className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-colors"
+                variant="ghost"
+              >
+                {action.icon === "upload" && <Plus className="w-4 h-4 mr-2" />}
+                {action.icon === "history" && <Clock className="w-4 h-4 mr-2" />}
+                {action.icon === "bot" && <MessageCircle className="w-4 h-4 mr-2" />}
+                {action.title.split(" ")[0]} {action.title.split(" ")[1]}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

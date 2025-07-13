@@ -93,15 +93,14 @@ export function Sidebar() {
           {mainItems.map((item) => {
             const isActive = location === item.path;
             return (
-              <div
-                key={item.id}
-                className={cn(
-                  "nav-item rounded-lg mb-2 transition-all duration-300 hover:translate-x-1",
-                  isActive && "bg-primary-50 border-l-4 border-primary-600 rounded-r-lg"
-                )}
-              >
-                <Link href={item.path}>
-                  <a className={cn(
+              <Link key={item.id} href={item.path}>
+                <div
+                  className={cn(
+                    "nav-item rounded-lg mb-2 transition-all duration-300 hover:translate-x-1",
+                    isActive && "bg-primary-50 border-l-4 border-primary-600 rounded-r-lg"
+                  )}
+                >
+                  <div className={cn(
                     "flex items-center px-3 py-3 font-medium transition-colors",
                     isActive
                       ? "text-primary-700"
@@ -114,9 +113,9 @@ export function Sidebar() {
                         <div className="w-2 h-2 bg-primary-600 rounded-full animate-pulse" />
                       </div>
                     )}
-                  </a>
-                </Link>
-              </div>
+                  </div>
+                </div>
+              </Link>
             );
           })}
         </div>
@@ -129,17 +128,14 @@ export function Sidebar() {
           {supportItems.map((item) => {
             const isActive = location === item.path;
             return (
-              <div
-                key={item.id}
-                className="nav-item rounded-lg hover:bg-neutral-50 mb-2 transition-all duration-300 hover:translate-x-1"
-              >
-                <Link href={item.path}>
-                  <a className="flex items-center px-3 py-3 text-neutral-700 hover:text-primary-600 transition-colors">
+              <Link key={item.id} href={item.path}>
+                <div className="nav-item rounded-lg hover:bg-neutral-50 mb-2 transition-all duration-300 hover:translate-x-1">
+                  <div className="flex items-center px-3 py-3 text-neutral-700 hover:text-primary-600 transition-colors">
                     <IconComponent iconName={item.icon} />
                     <span className="ml-3">{item.label}</span>
-                  </a>
-                </Link>
-              </div>
+                  </div>
+                </div>
+              </Link>
             );
           })}
         </div>

@@ -36,17 +36,24 @@ const formatCurrency = (amount: string) => {
   }).format(parseFloat(amount));
 };
 
-const formatDate = (date: Date | null) => {
+const formatDate = (date: Date | string | null) => {
   if (!date) return "Not analyzed";
   
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - date.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 1) return "1 day ago";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-  return `${Math.ceil(diffDays / 30)} months ago`;
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) return "Not analyzed";
+    
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - dateObj.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return "1 day ago";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+    return `${Math.ceil(diffDays / 30)} months ago`;
+  } catch (error) {
+    return "Not analyzed";
+  }
 };
 
 export function RecentPolicies() {
@@ -91,20 +98,21 @@ export function RecentPolicies() {
   }
 
   return (
-    <Card className="rounded-2xl shadow-lg border border-neutral-200">
-      <CardContent className="p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-neutral-900">Recent Policies</h2>
-          <Button
-            variant="ghost"
-            className="text-primary-600 hover:text-primary-700 font-medium"
-          >
-            View All
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-        
-        <div className="space-y-4">
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-neutral-900">Recent Policies</h2>
+        <Button
+          variant="ghost"
+          className="text-primary-600 hover:text-primary-700 font-medium"
+        >
+          View All
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+      
+      <Card className="rounded-2xl shadow-lg border-0 shadow-md">
+        <CardContent className="p-8">
+          <div className="space-y-4">
           {policies && policies.length > 0 ? (
             policies.slice(0, 3).map((policy) => {
               const PolicyIcon = getPolicyIcon(policy.policyType);
@@ -159,8 +167,9 @@ export function RecentPolicies() {
               </Button>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

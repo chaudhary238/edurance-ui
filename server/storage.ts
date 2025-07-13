@@ -42,6 +42,40 @@ export class MemStorage implements IStorage {
       fullName: "John Doe",
       membershipType: "premium"
     });
+    
+    // Add sample policies for demonstration
+    this.createPolicy({
+      userId: 1,
+      policyNumber: "AUTO-2024-001",
+      policyName: "Comprehensive Auto Insurance",
+      policyType: "auto",
+      premiumAmount: "1200",
+      coverageAmount: "50000",
+      status: "active",
+      lastAnalyzed: new Date(Date.now() - 86400000) // 1 day ago
+    });
+    
+    this.createPolicy({
+      userId: 1,
+      policyNumber: "HOME-2024-002",
+      policyName: "Homeowners Insurance Premium",
+      policyType: "home",
+      premiumAmount: "2400",
+      coverageAmount: "300000",
+      status: "active",
+      lastAnalyzed: new Date(Date.now() - 172800000) // 2 days ago
+    });
+    
+    this.createPolicy({
+      userId: 1,
+      policyNumber: "LIFE-2024-003",
+      policyName: "Term Life Insurance",
+      policyType: "life",
+      premiumAmount: "800",
+      coverageAmount: "500000",
+      status: "active",
+      lastAnalyzed: null
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -59,7 +93,8 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id, 
-      createdAt: new Date()
+      createdAt: new Date(),
+      membershipType: insertUser.membershipType || "basic"
     };
     this.users.set(id, user);
     return user;
@@ -81,7 +116,10 @@ export class MemStorage implements IStorage {
       ...insertPolicy,
       id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      status: insertPolicy.status || "active",
+      coverageAmount: insertPolicy.coverageAmount || null,
+      lastAnalyzed: insertPolicy.lastAnalyzed || null
     };
     this.policies.set(id, policy);
     return policy;
@@ -123,7 +161,10 @@ export class MemStorage implements IStorage {
     const analysis: PolicyAnalysis = {
       ...insertAnalysis,
       id,
-      createdAt: new Date()
+      createdAt: new Date(),
+      analysisData: insertAnalysis.analysisData || null,
+      riskScore: insertAnalysis.riskScore || null,
+      recommendations: insertAnalysis.recommendations || null
     };
     this.policyAnalyses.set(id, analysis);
     return analysis;

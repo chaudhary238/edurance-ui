@@ -71,7 +71,7 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, var(--neutral-50) 0%, var(--primary-100) 100%);
+    background: #f8fafc;
     min-height: 100vh;
   }
 }
