@@ -5,8 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Glossary from "@/pages/glossary";
-import PersonalizedManagement from "@/pages/personalized-management";
-import AdvancedGuidance from "@/pages/advanced-guidance";
+import RecentChatsPage from "@/pages/recent-chats";
 import HelpCenter from "@/pages/help-center";
 import ContactSupport from "@/pages/contact-support";
 import NotFound from "@/pages/not-found";
@@ -16,8 +15,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/glossary" component={Glossary} />
-      <Route path="/management" component={PersonalizedManagement} />
-      <Route path="/guidance" component={AdvancedGuidance} />
+      <Route path="/recent" component={RecentChatsPage} />
       <Route path="/help" component={HelpCenter} />
       <Route path="/support" component={ContactSupport} />
       <Route component={NotFound} />

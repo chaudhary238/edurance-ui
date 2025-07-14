@@ -1,57 +1,48 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
-
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
-  }
-}
-
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res;
-}
-
-type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
-      credentials: "include",
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
-
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+import { QueryClient } from "@tanstack/react-query";
+import { ZodError } from "zod";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
-    },
-    mutations: {
-      retry: false,
+      queryFn: async ({ queryKey }) => {
+        const [url, params] = queryKey;
+        
+        if (typeof url !== 'string') {
+          throw new Error("Query key must be a URL string");
+        }
+        
+        const fullUrl = new URL(url, window.location.origin);
+        
+        if (params && typeof params === 'object') {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              fullUrl.searchParams.append(key, String(value));
+            }
+          });
+        }
+
+        try {
+          const response = await fetch(fullUrl.toString());
+
+          if (!response.ok) {
+            const errorBody = await response.json();
+            throw new Error(errorBody.message || `Request failed with status ${response.status}`);
+          }
+          
+          return await response.json();
+
+        } catch (error) {
+          if (error instanceof ZodError) {
+            console.error("Zod validation error:", error.errors);
+            throw new Error("Data validation failed!");
+          } else if (error instanceof Error) {
+            console.error("Fetch error:", error.message);
+            throw error;
+          }
+          throw new Error("An unknown error occurred during fetch");
+        }
+      },
+      staleTime: 1000 * 60, // 1 minute
     },
   },
 });

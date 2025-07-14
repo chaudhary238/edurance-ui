@@ -1,100 +1,128 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useState, useRef } from "react";
+import { Search, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
 import { Policy } from "@shared/schema";
+import { 
+    DropdownMenu, 
+    DropdownMenuContent, 
+    DropdownMenuItem, 
+    DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 interface SearchSectionProps {
-  onSearchResults?: (results: Policy[]) => void;
+  onSearch: (results: Policy[]) => void;
+  onFileUpload?: (file: File) => void;
+  onQuerySubmit?: (query: string) => void;
+  isLoading?: boolean;
 }
 
-export function SearchSection({ onSearchResults }: SearchSectionProps) {
+export function SearchSection({ onSearch, onFileUpload, onQuerySubmit, isLoading = false }: SearchSectionProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [hasSearched, setHasSearched] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: searchResults, isLoading, refetch } = useQuery({
-    queryKey: ['/api/policies/search', searchQuery],
-    enabled: false,
-  });
-
-  const handleSearch = async () => {
+  const handleSubmit = async () => {
     if (!searchQuery.trim()) return;
-    
-    setHasSearched(true);
-    const result = await refetch();
-    
-    if (result.data && onSearchResults) {
-      onSearchResults(result.data);
+
+    // If onQuerySubmit is provided, it means this is the main dashboard search.
+    // The parent component is responsible for the API call and loading state.
+    if (onQuerySubmit) {
+      onQuerySubmit(searchQuery);
+    } else {
+      // Otherwise, this is a simple search (e.g., in PolicyComparison)
+      // and this component handles its own state.
+      // Note: We'd need to bring back the local isLoading state for this to work perfectly.
+      // For now, we assume the parent manages loading if it's a complex search.
+    try {
+      const response = await fetch(`/api/policies/search?query=${encodeURIComponent(searchQuery)}`);
+        if (!response.ok) throw new Error('Search failed.');
+      const results = await response.json();
+      onSearch(results);
+    } catch (error) {
+      console.error(error);
+        onSearch([]);
+      }
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSearch();
+      handleSubmit();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onFileUpload) {
+      console.log("File selected:", file.name);
+      onFileUpload(file);
+    }
+  };
+
+  const triggerFileSelect = (accept: string) => {
+    if (fileInputRef.current) {
+        fileInputRef.current.accept = accept;
+        fileInputRef.current.click();
     }
   };
 
   return (
-    <div className="animate-slide-in mb-12">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-3">Policy Analysis</h1>
-        <p className="text-neutral-600 text-lg max-w-2xl mx-auto">
-          First, let's find your policy document.
-        </p>
-      </div>
-      
-      <div className="max-w-2xl mx-auto">
-        <div className="relative mb-6">
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="w-full pl-4 pr-20 py-4 text-lg border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-neutral-900 placeholder-neutral-500 shadow-sm"
-            placeholder="Enter your policy name or keywords..."
-          />
-          <Button 
-            onClick={handleSearch}
-            disabled={isLoading || !searchQuery.trim()}
-            className="absolute right-2 top-2 bottom-2 bg-primary-600 hover:bg-primary-700 text-white px-6 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Searching...
-              </>
-            ) : (
-              "Search"
-            )}
-          </Button>
+    <div className="max-w-2xl mx-auto">
+        <div className="relative">
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-8 text-neutral-500 hover:text-neutral-900 rounded-full"
+                        disabled={isLoading}
+                    >
+                        <Paperclip className="w-5 h-5" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                    <DropdownMenuItem onClick={() => triggerFileSelect(".jpg,.jpeg,.png")}>
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Image
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => triggerFileSelect(".pdf,.doc,.docx")}>
+                        <FileText className="w-4 h-4 mr-2" />
+                        Document
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="w-full pl-12 pr-12 py-3 text-base border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 transition-all text-neutral-900 placeholder-neutral-500 h-10"
+                placeholder="Search your policies or ask a question..."
+                disabled={isLoading}
+            />
+
+            <Button 
+                onClick={handleSubmit}
+                disabled={isLoading || !searchQuery.trim()}
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-8 text-neutral-500 hover:text-neutral-900 rounded-full"
+            >
+                {isLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                ) : (
+                    <Search className="w-5 h-5" />
+                )}
+            </Button>
         </div>
         
-        {hasSearched && searchResults && (
-          <div className="bg-white rounded-xl shadow-lg border border-neutral-200 p-6">
-            <h3 className="font-semibold text-neutral-900 mb-4">
-              Search Results ({searchResults.length})
-            </h3>
-            {searchResults.length === 0 ? (
-              <p className="text-neutral-600">No policies found matching your search.</p>
-            ) : (
-              <div className="space-y-3">
-                {searchResults.slice(0, 3).map((policy) => (
-                  <div key={policy.id} className="border border-neutral-200 rounded-lg p-4 hover:bg-neutral-50 transition-colors">
-                    <div className="font-medium text-neutral-900">{policy.policyName}</div>
-                    <div className="text-neutral-600 text-sm">Policy #: {policy.policyNumber}</div>
-                  </div>
-                ))}
-                {searchResults.length > 3 && (
-                  <p className="text-neutral-600 text-sm">
-                    +{searchResults.length - 3} more results
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+        <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+        />
     </div>
   );
 }

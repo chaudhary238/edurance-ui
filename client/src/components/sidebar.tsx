@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, ChartLine, BookOpen, UserCog, Lightbulb, HelpCircle, Headphones, Settings, User } from "lucide-react";
+import { Shield, ChartLine, BookOpen, UserCog, Lightbulb, HelpCircle, Headphones, Settings, User, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NavigationItem } from "@shared/schema";
 
@@ -9,6 +9,13 @@ const navigationItems: NavigationItem[] = [
     label: "Policy Analysis",
     icon: "chart-line",
     path: "/",
+    category: "main"
+  },
+  {
+    id: "recent-chats",
+    label: "Recent Chats",
+    icon: "message-square",
+    path: "/recent",
     category: "main"
   },
   {
@@ -52,6 +59,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
   const iconMap = {
     "chart-line": ChartLine,
     "book-open": BookOpen,
+    "message-square": MessageSquare,
     "user-cog": UserCog,
     "lightbulb": Lightbulb,
     "help-circle": HelpCircle,

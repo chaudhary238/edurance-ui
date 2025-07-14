@@ -1,6 +1,9 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
+import animate from "tailwindcss-animate"
+import lineClamp from "@tailwindcss/line-clamp"
+import typography from "@tailwindcss/typography"
 
-export default {
+const config = {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
@@ -86,5 +89,7 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
-} satisfies Config;
+  plugins: [animate, lineClamp, typography],
+} satisfies Config
+
+export default config
